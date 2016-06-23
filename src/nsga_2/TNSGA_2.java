@@ -1,11 +1,12 @@
 package nsga_2;
 
+import individual.TMOIndividual;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import individual.TMOIndividual;
 import problem.IProblem;
 import report.rex_jgg.TRex;
 
@@ -24,7 +25,6 @@ public class TNSGA_2 {
 	private IProblem fProblem;
 	private TRex rex;
 
-
 	public TNSGA_2(IProblem problem) {
 		fGeneration = 0;
 		random = new Random();
@@ -33,7 +33,6 @@ public class TNSGA_2 {
 
 		initialGen();
 	}
-
 
 	/**
 	 * 1世代アルゴリズムを進める
@@ -54,16 +53,16 @@ public class TNSGA_2 {
 		nonDominatedSort(uArrayList);
 		calcCrowdingDistance(uArrayList);
 
-		//Sに相当
+		// Sに相当
 		fPopulation.clear();
 		for (int i = 0; fPopulation.size() < fPopulationSize; i++) {
 			final int rank = i;
 			uArrayList.stream().filter(e -> e.getRank() == rank).collect(Collectors.toList());
 		}
 
-		if(fPopulation.size() > fPopulationSize){
-			//CCOに基づきソート
-			fPopulation.sort((a,b) -> a.compareTo(b));
+		if (fPopulation.size() > fPopulationSize) {
+			// CCOに基づきソート
+			fPopulation.sort((a, b) -> a.compareTo(b));
 			int removeCount = fPopulation.size() - fPopulationSize;
 			for (int i = removeCount; i > 0; i--) {
 				fPopulation.remove(fPopulationSize + i - 1);
@@ -77,7 +76,6 @@ public class TNSGA_2 {
 		return fGeneration >= fMaxGeneration;
 	}
 
-
 	private void initialGen() {
 		for (int i = 0; i < fPopulationSize; i++) {
 			TMOIndividual individual = new TMOIndividual();
@@ -90,7 +88,7 @@ public class TNSGA_2 {
 		}
 	}
 
-	private void evaluateFunction(TMOIndividual x){
+	private void evaluateFunction(TMOIndividual x) {
 		x.setF1Value(fProblem.f1(x));
 		x.setF2Value(fProblem.f2(x));
 	}
@@ -103,9 +101,53 @@ public class TNSGA_2 {
 
 	}
 
+	/**
+	 * fPopulatoinから親個体をトーナメント方式で選択
+	 *
+	 * @return
+	 */
 	private TMOIndividual[] selectByTournament() {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+		TMOIndividual[] parents = new TMOIndividual[fNoOfParents];
+		for (int i = 0; i < fNoOfParents; i++) {
+			shuffle();
+			TMOIndividual cand1 = fPopulation.remove(0);
+			TMOIndividual cand2 = fPopulation.remove(0);
+			if (cand1.compareTo(cand2) >= 0) {
+				parents[i] = cand1;
+				fPopulation.add(cand2);
+			}
+			else {
+				parents[i] = cand2;
+				fPopulation.add(cand1);
+			}
+		}
+		for (int i = 0; i < parents.length; i++) {
+			fPopulation.add(parents[i].clone());
+		}
+		return parents;
 	}
 
+	/**
+	 * fPopulationの要素をランダムに入れ替えるメソッド<br>
+	 * これにより非復元抽出の処理が簡潔になる
+	 *
+	 */
+	public void shuffle() {
+		for (int i = 0; i < fPopulationSize; i++) {
+			int index = random.nextInt(fPopulationSize - i) + i;
+			swap(i, index);
+		}
+	}
+
+	/**
+	 * index1とindex2にある要素を入れ替える
+	 *
+	 * @param index1
+	 * @param index2
+	 */
+	public void swap(int index1, int index2) {
+		TMOIndividual temp = fPopulation.get(index1).clone();
+		fPopulation.set(index1, fPopulation.get(index2));
+		fPopulation.set(index2, temp);
+	}
 }
