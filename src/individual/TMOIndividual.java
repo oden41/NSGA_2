@@ -1,5 +1,7 @@
 package individual;
 
+import java.util.ArrayList;
+
 import report.rex_jgg.TIndividual;
 
 public class TMOIndividual extends TIndividual implements Comparable {
@@ -9,16 +11,26 @@ public class TMOIndividual extends TIndividual implements Comparable {
 	private double f1Value;
 	private double f2Value;
 
+	// 非優越ソートで用いる
+	public ArrayList<TMOIndividual> S;
+	public int n;
+
 	public TMOIndividual() {
 		super();
+		S = new ArrayList<>();
 	}
 
+	/**
+	 * Sのみコピーしない
+	 * 
+	 * @see report.rex_jgg.TIndividual#clone()
+	 */
 	@Override
 	public TMOIndividual clone() {
 		TMOIndividual individual = new TMOIndividual();
 		individual.copyFrom(this);
 		individual.fRank = fRank;
-		individual.fCrowdDistance = fCrowdDistance;
+		individual.setCrowdDistance(fCrowdDistance);
 		individual.f1Value = f1Value;
 		individual.f2Value = f2Value;
 		return individual;
@@ -42,7 +54,7 @@ public class TMOIndividual extends TIndividual implements Comparable {
 		if (fRank != otherIndividual.fRank)
 			return fRank - otherIndividual.fRank;
 
-		return fCrowdDistance > otherIndividual.fCrowdDistance ? -1 : 1;
+		return getCrowdDistance() > otherIndividual.getCrowdDistance() ? -1 : 1;
 	}
 
 	public double getF1Value() {
@@ -61,4 +73,21 @@ public class TMOIndividual extends TIndividual implements Comparable {
 		this.f2Value = f2Value;
 	}
 
+	public double getCrowdDistance() {
+		return fCrowdDistance;
+	}
+
+	public void setCrowdDistance(double crowdDistance) {
+		fCrowdDistance = crowdDistance;
+	}
+
+	/**
+	 * this > other (thisはotherを優越する)かどうかを判定
+	 *
+	 * @param other
+	 * @return
+	 */
+	public boolean isDominant(TMOIndividual other) {
+		return f1Value <= other.f1Value && f2Value <= other.f2Value && (f1Value < other.f1Value || f2Value < other.f2Value);
+	}
 }

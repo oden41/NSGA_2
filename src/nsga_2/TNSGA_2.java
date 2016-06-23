@@ -94,11 +94,67 @@ public class TNSGA_2 {
 	}
 
 	private void nonDominatedSort(ArrayList<TMOIndividual> population) {
+		ArrayList<TMOIndividual> F = new ArrayList<>();
+		for (int i = 0; i < population.size(); i++) {
+			TMOIndividual x = population.get(i);
+			x.S.clear();
+			x.n = 0;
+			for (int j = 0; j < population.size(); j++) {
+				TMOIndividual y = population.get(j);
+				if (x.isDominant(y))
+					x.S.add(y);
+				else if (y.isDominant(x))
+					x.n++;
+			}
+			if (x.n == 0) {
+				F.add(x);
+				x.setRank(1);
+			}
+		}
+		int i = 1;
+		while (!F.isEmpty()) {
+			ArrayList<TMOIndividual> Q = new ArrayList<>();
+			for (TMOIndividual x : F) {
+				for (TMOIndividual y : x.S) {
+					y.n--;
+					if (y.n == 0) {
+						y.setRank(i + 1);
+						Q.add(y);
+					}
+				}
+			}
+			i++;
+			F.clear();
+			F.addAll(Q);
+		}
 
 	}
 
 	private void calcCrowdingDistance(ArrayList<TMOIndividual> population) {
-
+		population.forEach(action -> action.setCrowdDistance(0));
+		// 2目的関数なので2で固定
+		for (int i = 0; i < 2; i++) {
+			if (i == 0) {
+				population.sort((a, b) -> Double.compare(a.getF1Value(), b.getF1Value()));
+				population.get(0).setCrowdDistance(Double.POSITIVE_INFINITY);
+				population.get(population.size() - 1).setCrowdDistance(Double.POSITIVE_INFINITY);
+				for (int j = 1; j < population.size() - 1; j++) {
+					double d = population.get(j).getCrowdDistance();
+					d += Math.abs(population.get(j + 1).getF1Value() - population.get(j - 1).getF1Value());
+					population.get(j).setCrowdDistance(d);
+				}
+			}
+			else {
+				population.sort((a, b) -> Double.compare(a.getF2Value(), b.getF2Value()));
+				population.get(0).setCrowdDistance(Double.POSITIVE_INFINITY);
+				population.get(population.size() - 1).setCrowdDistance(Double.POSITIVE_INFINITY);
+				for (int j = 1; j < population.size() - 1; j++) {
+					double d = population.get(j).getCrowdDistance();
+					d += Math.abs(population.get(j + 1).getF2Value() - population.get(j - 1).getF2Value());
+					population.get(j).setCrowdDistance(d);
+				}
+			}
+		}
 	}
 
 	/**
