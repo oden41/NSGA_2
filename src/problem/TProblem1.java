@@ -2,7 +2,7 @@ package problem;
 
 import individual.TMOIndividual;
 
-public class TProblem1 implements IProblem{
+public class TProblem1 implements IProblem {
 
 	private int fLimit;
 

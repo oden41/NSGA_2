@@ -2,7 +2,7 @@ package individual;
 
 import report.rex_jgg.TIndividual;
 
-public class TMOIndividual extends TIndividual implements Comparable{
+public class TMOIndividual extends TIndividual implements Comparable {
 
 	private int fRank;
 	private double fCrowdDistance;
@@ -13,6 +13,17 @@ public class TMOIndividual extends TIndividual implements Comparable{
 		super();
 	}
 
+	@Override
+	public TMOIndividual clone() {
+		TMOIndividual individual = new TMOIndividual();
+		individual.copyFrom(this);
+		individual.fRank = fRank;
+		individual.fCrowdDistance = fCrowdDistance;
+		individual.f1Value = f1Value;
+		individual.f2Value = f2Value;
+		return individual;
+	}
+
 	public int getRank() {
 		return fRank;
 	}
@@ -21,17 +32,18 @@ public class TMOIndividual extends TIndividual implements Comparable{
 		this.fRank = fRank;
 	}
 
-    /**
-     * CCOにもとづいてソート
-     * @see java.lang.Comparable#compareTo(T)
-     */
-    public int compareTo(Object other) {
-    	TMOIndividual otherIndividual = (TMOIndividual)other;
-    	if(fRank != otherIndividual.fRank)
-    		return fRank - otherIndividual.fRank;
+	/**
+	 * CCOにもとづいてソート
+	 *
+	 * @see java.lang.Comparable#compareTo(T)
+	 */
+	public int compareTo(Object other) {
+		TMOIndividual otherIndividual = (TMOIndividual) other;
+		if (fRank != otherIndividual.fRank)
+			return fRank - otherIndividual.fRank;
 
-    	return fCrowdDistance > otherIndividual.fCrowdDistance ? -1 : 1;
-    }
+		return fCrowdDistance > otherIndividual.fCrowdDistance ? -1 : 1;
+	}
 
 	public double getF1Value() {
 		return f1Value;

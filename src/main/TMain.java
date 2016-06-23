@@ -14,5 +14,4 @@ public class TMain {
 			tnsga_2.doOneIteration();
 		}
 	}
-
 }
