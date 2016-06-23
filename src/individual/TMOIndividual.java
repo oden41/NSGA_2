@@ -22,7 +22,7 @@ public class TMOIndividual extends TIndividual implements Comparable {
 
 	/**
 	 * Sのみコピーしない
-	 * 
+	 *
 	 * @see report.rex_jgg.TIndividual#clone()
 	 */
 	@Override
@@ -34,6 +34,17 @@ public class TMOIndividual extends TIndividual implements Comparable {
 		individual.f1Value = f1Value;
 		individual.f2Value = f2Value;
 		return individual;
+	}
+
+	@Override
+	public TMOIndividual copyFrom(TIndividual individual) {
+		super.copyFrom(individual);
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return f1Value + "," + f2Value;
 	}
 
 	public int getRank() {

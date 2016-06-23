@@ -17,7 +17,7 @@ public class TProblem2 implements IProblem {
 
 	@Override
 	public double f2(TMOIndividual x) {
-		return Math.pow(2, -0.25) * Math.sqrt(Math.pow(x.getVector().getElement(0), 2) + Math.pow(x.getVector().getElement(1) - 1, 2));
+		return Math.pow(2, -0.25) * Math.sqrt(Math.sqrt(Math.pow(x.getVector().getElement(0), 2) + Math.pow(x.getVector().getElement(1) - 1, 2)));
 	}
 
 	@Override

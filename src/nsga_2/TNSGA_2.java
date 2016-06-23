@@ -1,13 +1,13 @@
 package nsga_2;
 
-import individual.TMOIndividual;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import individual.TMOIndividual;
 import problem.IProblem;
+import report.rex_jgg.TIndividual;
 import report.rex_jgg.TRex;
 
 public class TNSGA_2 {
@@ -28,6 +28,7 @@ public class TNSGA_2 {
 	public TNSGA_2(IProblem problem) {
 		fGeneration = 0;
 		random = new Random();
+		fPopulation = new ArrayList<>();
 		rex = new TRex(random);
 		fProblem = problem;
 
@@ -39,33 +40,38 @@ public class TNSGA_2 {
 	 *
 	 */
 	public void doOneIteration() {
-		nonDominatedSort(fPopulation);
-		calcCrowdingDistance(fPopulation);
+		nonDominatedSort(getPopulation());
+		calcCrowdingDistance(getPopulation());
 
 		TMOIndividual[] parents = selectByTournament();
-		TMOIndividual[] children = (TMOIndividual[]) rex.makeOffspring(parents, fNoOfChildren);
+		TIndividual[] tempchildren = rex.makeOffspring(parents, fNoOfChildren);
+		TMOIndividual[] children = new TMOIndividual[tempchildren.length];
+		for (int i = 0; i < children.length; i++) {
+			children[i] = new TMOIndividual();
+			children[i].copyFrom(tempchildren[i]);
+		}
 		for (TMOIndividual tmoIndividual : children) {
 			evaluateFunction(tmoIndividual);
 		}
 
-		ArrayList<TMOIndividual> uArrayList = new ArrayList<>(fPopulation);
+		ArrayList<TMOIndividual> uArrayList = new ArrayList<>(getPopulation());
 		Collections.addAll(uArrayList, children);
 		nonDominatedSort(uArrayList);
 		calcCrowdingDistance(uArrayList);
 
 		// Sに相当
-		fPopulation.clear();
-		for (int i = 0; fPopulation.size() < fPopulationSize; i++) {
+		getPopulation().clear();
+		for (int i = 0; getPopulation().size() < fPopulationSize; i++) {
 			final int rank = i;
-			uArrayList.stream().filter(e -> e.getRank() == rank).collect(Collectors.toList());
+			getPopulation().addAll(uArrayList.stream().filter(e -> e.getRank() == rank).collect(Collectors.toList()));
 		}
 
-		if (fPopulation.size() > fPopulationSize) {
+		if (getPopulation().size() > fPopulationSize) {
 			// CCOに基づきソート
-			fPopulation.sort((a, b) -> a.compareTo(b));
-			int removeCount = fPopulation.size() - fPopulationSize;
+			getPopulation().sort((a, b) -> a.compareTo(b));
+			int removeCount = getPopulation().size() - fPopulationSize;
 			for (int i = removeCount; i > 0; i--) {
-				fPopulation.remove(fPopulationSize + i - 1);
+				getPopulation().remove(fPopulationSize + i - 1);
 			}
 		}
 
@@ -84,7 +90,7 @@ public class TNSGA_2 {
 				individual.getVector().setElement(j, random.nextDouble() * fProblem.getLimit() * 2 - fProblem.getLimit());
 			}
 			evaluateFunction(individual);
-			fPopulation.add(individual);
+			getPopulation().add(individual);
 		}
 	}
 
@@ -166,19 +172,19 @@ public class TNSGA_2 {
 		TMOIndividual[] parents = new TMOIndividual[fNoOfParents];
 		for (int i = 0; i < fNoOfParents; i++) {
 			shuffle();
-			TMOIndividual cand1 = fPopulation.remove(0);
-			TMOIndividual cand2 = fPopulation.remove(0);
+			TMOIndividual cand1 = getPopulation().remove(0);
+			TMOIndividual cand2 = getPopulation().remove(0);
 			if (cand1.compareTo(cand2) >= 0) {
 				parents[i] = cand1;
-				fPopulation.add(cand2);
+				getPopulation().add(cand2);
 			}
 			else {
 				parents[i] = cand2;
-				fPopulation.add(cand1);
+				getPopulation().add(cand1);
 			}
 		}
 		for (int i = 0; i < parents.length; i++) {
-			fPopulation.add(parents[i].clone());
+			getPopulation().add(parents[i].clone());
 		}
 		return parents;
 	}
@@ -189,8 +195,8 @@ public class TNSGA_2 {
 	 *
 	 */
 	public void shuffle() {
-		for (int i = 0; i < fPopulationSize; i++) {
-			int index = random.nextInt(fPopulationSize - i) + i;
+		for (int i = 0; i < getPopulation().size(); i++) {
+			int index = random.nextInt(getPopulation().size() - i) + i;
 			swap(i, index);
 		}
 	}
@@ -202,8 +208,12 @@ public class TNSGA_2 {
 	 * @param index2
 	 */
 	public void swap(int index1, int index2) {
-		TMOIndividual temp = fPopulation.get(index1).clone();
-		fPopulation.set(index1, fPopulation.get(index2));
-		fPopulation.set(index2, temp);
+		TMOIndividual temp = getPopulation().get(index1).clone();
+		getPopulation().set(index1, getPopulation().get(index2));
+		getPopulation().set(index2, temp);
+	}
+
+	public ArrayList<TMOIndividual> getPopulation() {
+		return fPopulation;
 	}
 }
